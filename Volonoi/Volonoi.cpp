@@ -25,11 +25,11 @@ unsigned int num_points;
 
 // OpenGL関係の初期設定
 void initGL(void) {
-	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-	glEnable(GL_DEPTH_TEST);
+	glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // 背景色は白
+	glEnable(GL_DEPTH_TEST);              // デプスバッファ機能を使用
 	glClearDepth(1.0);
 	glDepthFunc(GL_LESS);
-	glDisable(GL_LIGHTING);
+	glDisable(GL_LIGHTING);               // 照明は用いない
 }
 
 // ボロノイ母点の生成
@@ -39,6 +39,7 @@ void genPoints(unsigned int num) {
 
 	// numがMAX_NUM_POINTSを超える場合には，それ以下に修正
 	if (num > MAX_NUM_POINTS) {
+		printf("Too many points to generate.");
 		num = MAX_NUM_POINTS;
 	}
 
@@ -49,7 +50,7 @@ void genPoints(unsigned int num) {
 			left = bottom = 0.0;
 			right = (double)window_width;
 			top = (double)window_height;
-			return;
+			return;`
 		}
 		x = window_width * ((double)rand() / (double)RAND_MAX);
 		y = window_height * ((double)rand() / (double)RAND_MAX);
@@ -137,7 +138,8 @@ void resize(int width, int height) {
 	bottom -= d;
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[]) 
+{
 	glutInitWindowPosition(INIT_X_POS, INIT_Y_POS);
 	glutInitWindowSize(INIT_WIDTH, INIT_HEIGHT);
 	glutInit(&argc, argv);
