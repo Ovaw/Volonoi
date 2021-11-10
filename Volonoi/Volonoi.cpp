@@ -22,6 +22,14 @@ double left, right, bottom, top;
 double point[MAX_NUM_POINTS][2];
 unsigned int num_points;
 
+// 表示モード
+#define DISPLAY_POINTS 0
+#define DISPLAY_CONES 1
+unsigned int display_mode = DISPLAY_POINTS;
+
+// 円周率
+#define PI 3.141592653589793
+
 // OpenGL関係の初期設定
 void initGL(void) {
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // 背景色は白
@@ -73,9 +81,57 @@ void displayPoints(void) {
 	glEnd();
 }
 
-// 表示モード
-#define DISPLAY_POINTS 0
-unsigned int display_mode = DISPLAY_POINTS;
+// ボロノイ母点下に配置された円錐形の描画
+void displayCone(double peak_point[])
+// double peak_point[]: xy平面上の点の座標 これを頂点とするxy平面の下側に描く
+{
+	int i;
+	double x, y, radius;
+
+	// ウィンドウ内に中心をもつ円がウィンドウを覆いつくすために必要な半径
+	radius = sqrt((double)(window_width * window_width + window_height * window_height)) * 1.1;
+
+	// peak_pointを頂点とする円錐を描く
+	glBegin(GL_TRIANGLE_FAN);
+	glVertex3d(peak_point[X], peak_point[Y], 0.0);
+	for (i = 0; i <= 360; i++) {
+		x = radius * cos((i % 360) / 180 * PI);
+		y = radius * sin((i % 360) / 180 * PI);
+		glVertex3d(peak_point[X] + x, peak_point[Y] + y, (-radius));
+	}
+	glEnd();
+}
+
+// 指定したIDに対応した色(r, g, b)を与える処理
+void IDToColor(unsigned int id)
+// unsigned int id; ID値
+{
+	GLubyte r, g, b;
+	unsigned int tmp;
+	r = (GLubyte)(id / 65536); // 65536 = 256 * 256
+	tmp = id % 65536;
+	g = (GLubyte)(tmp / 256);
+	b = (GLubyte)(tmp % 256);
+	glColor3ub(r, g, b);
+}
+
+// 色から対応するIDを得る処理
+unsigned int colorToID(GLubyte r, GLubyte g, GLubyte b)
+// GLubyte r, g, b 色データ
+{
+	return(r * 65536 + g * 256 + b);
+}
+
+// 円錐形状群の表示
+void displayCones(void)
+{
+	unsigned int i;
+	for (i = 0; i < num_points; i++)
+	{
+		IDToColor(i);
+		displayCone(point[i]);
+	}
+}
 
 // 表示
 void display(void) {
@@ -89,6 +145,11 @@ void display(void) {
 	switch (display_mode) {
 		case DISPLAY_POINTS:
 			displayPoints();
+			break;
+		case DISPLAY_CONES:
+			displayCones();
+			displayPoints();
+			break;
 		default:
 			break;
 	}
@@ -100,7 +161,7 @@ void keyboard(unsigned char key, int x, int y) {
 	switch (key) {
 		case 'q':
 		case 'Q':
-		case '\033':
+		case '\033': // Esc
 			exit(0);
 
 			// ランダムな点群の生成
@@ -108,6 +169,12 @@ void keyboard(unsigned char key, int x, int y) {
 		case 'G':
 			genPoints(1000);
 			display_mode = DISPLAY_POINTS;
+			glutPostRedisplay();
+			break;
+			// ボロノイ図の生成
+		case 'v':
+		case 'V':
+			display_mode = DISPLAY_CONES;
 			glutPostRedisplay();
 			break;
 		default:
