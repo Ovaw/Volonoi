@@ -40,7 +40,7 @@ void initGL(void) {
 }
 
 // ボロノイ母点の生成
-// [0, window_width]x[0, window_height]野は似ないにランダムにnum個の点を生成し，これを母点とする
+// [0, window_width]x[0, window_height]範囲内にランダムにnum個の点を生成し，これを母点とする
 void genPoints(unsigned int num) {
 	double x, y;
 
@@ -89,14 +89,14 @@ void displayCone(double peak_point[])
 	double x, y, radius;
 
 	// ウィンドウ内に中心をもつ円がウィンドウを覆いつくすために必要な半径
-	radius = sqrt((double)(window_width * window_width + window_height * window_height)) * 1.1;
+	radius = static_cast<double>(sqrt((double)(window_width * window_width + window_height * window_height)) * 1.1);
 
 	// peak_pointを頂点とする円錐を描く
 	glBegin(GL_TRIANGLE_FAN);
 	glVertex3d(peak_point[X], peak_point[Y], 0.0);
 	for (i = 0; i <= 360; i++) {
-		x = radius * cos((i % 360) / 180 * PI);
-		y = radius * sin((i % 360) / 180 * PI);
+		x = radius * cos((i % 360) / 180.0 * PI);
+		y = radius * sin((i % 360) / 180.0 * PI);
 		glVertex3d(peak_point[X] + x, peak_point[Y] + y, (-radius));
 	}
 	glEnd();
