@@ -1,5 +1,4 @@
-#include <iostream>
-#include <math.h>
+#include <bits/stdc++.h>
 #include <gl/freeglut.h>
 
 // ウィンドウの初期位置と初期サイズ
@@ -50,7 +49,7 @@ void genPoints(unsigned int num) {
 			left = bottom = 0.0;
 			right = (double)window_width;
 			top = (double)window_height;
-			return;`
+			return;
 		}
 		x = window_width * ((double)rand() / (double)RAND_MAX);
 		y = window_height * ((double)rand() / (double)RAND_MAX);
@@ -81,9 +80,9 @@ unsigned int display_mode = DISPLAY_POINTS;
 // 表示
 void display(void) {
 	glMatrixMode(GL_PROJECTION);
-	glLoadIdentitiy();
+	glLoadIdentity();
 	glOrtho(left, right, bottom, top, -1.0, 2000.0);
-	glViewPort(0, 0, window_width, window_height);
+	glViewport(0, 0, window_width, window_height);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// モード(今後増えてく)
@@ -109,7 +108,7 @@ void keyboard(unsigned char key, int x, int y) {
 		case 'G':
 			genPoints(1000);
 			display_mode = DISPLAY_POINTS;
-			glutPostRedeisplay();
+			glutPostRedisplay();
 			break;
 		default:
 			break;
