@@ -30,6 +30,16 @@ unsigned int display_mode = DISPLAY_POINTS;
 // 円周率
 #define PI 3.141592653589793
 
+// 画像の最大サイズ 画像の最大ピクセル数を2048x1024と仮定
+#define MAX_WIDTH 2048
+#define MAX_HEIGHT 1024
+
+// 画像の色データ
+GLubyte color_data[MAX_WIDTH * MAX_HEIGHT][4];
+
+// 検出された母点
+int detected_point_index = -1;
+
 // OpenGL関係の初期設定
 void initGL(void) {
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // 背景色は白
@@ -75,7 +85,8 @@ void displayPoints(void) {
 	glPointSize(4.0f);  
 	glBegin(GL_POINTS);
 	for (i = 0; i < num_points; i++) {
-		glColor3d(1.0, 0.0, 0.0);
+		if (i == detected_point_index) glColor3d(1.0, 1.0, 0.0); // 検出点のみ色を変える
+		else glColor3d(1.0, 0.0, 0.0);
 		glVertex3d(point[i][X], point[i][Y], 0.0);
 	}
 	glEnd();
@@ -148,6 +159,7 @@ void display(void) {
 			break;
 		case DISPLAY_CONES:
 			displayCones();
+			glReadPixels(0, 0, window_width, window_height, GL_RGBA, GL_UNSIGNED_BYTE, color_data);
 			displayPoints();
 			break;
 		default:
@@ -169,7 +181,7 @@ void keyboard(unsigned char key, int x, int y) {
 		case 'G':
 			genPoints(1000);
 			display_mode = DISPLAY_POINTS;
-			glutPostRedisplay();
+			glutPostRedisplay();	
 			break;
 			// ボロノイ図の生成
 		case 'v':
@@ -181,6 +193,31 @@ void keyboard(unsigned char key, int x, int y) {
 			break;
 	}
 }
+
+// マウスのボタン操作
+void mouse_button(int button, int state, int x, int y)
+{
+	unsigned int shift, index;
+	switch (button) {
+
+		// マウスの左ボタンを押すと最寄りの点を取得
+	case GLUT_LEFT_BUTTON:
+		if (state == GLUT_DOWN) {
+			shift = window_width * (window_height - y) + x;
+			index = colorToID(color_data[shift][0], color_data[shift][1], color_data[shift][2]);
+			if (index < num_points)
+			{
+				detected_point_index = index;
+				printf("Nearest point: %d\n", detected_point_index);
+			}
+			glutPostRedisplay();
+			break;
+		}
+	default:
+		break;
+	}
+}
+
 
 // ウィンドウサイズの変更に対応するコールバック関数
 void resize(int width, int height) {
@@ -214,6 +251,7 @@ int main(int argc, char *argv[])
 	glutDisplayFunc(display);
 	glutKeyboardFunc(keyboard);
 	glutReshapeFunc(resize);
+	glutMouseFunc(mouse_button);
 	initGL();
 	glutMainLoop();
 	return 0;
